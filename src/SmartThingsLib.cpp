@@ -232,7 +232,7 @@ void SmartThingsLib::callbackForVarSet(CallbackVarSet *callback) {
     _callbackVarSet = callback;
 }
 
-bool SmartThingsLib::dispatchCallback(char *action) {
+String SmartThingsLib::dispatchCallback(char *action) {
 
 #if STLIB_SERIAL_DEBUGGING > 1
     Serial.println("[Callbacks] Checking action = " + String(action) + " to dispatch possible callback in " + String(_callbacksCount) + " records...");
@@ -246,7 +246,7 @@ bool SmartThingsLib::dispatchCallback(char *action) {
 #if STLIB_SERIAL_DEBUGGING > 1
             Serial.println("[Callbacks] Action = " + String(action) + " malformed.");
 #endif
-            return false;
+            return "";
         }
 
         // We now know that the URL contains at least one character.  And,
@@ -269,8 +269,7 @@ bool SmartThingsLib::dispatchCallback(char *action) {
 #if STLIB_SERIAL_DEBUGGING > 1
                     Serial.println("[Callbacks] Found callback for action = " + String(action) + " dispatching...");
 #endif
-                    _callbacks[i].callback();
-                    return true;
+                    return _callbacks[i].callback();
                 }
 
             }
@@ -279,7 +278,7 @@ bool SmartThingsLib::dispatchCallback(char *action) {
 #if STLIB_SERIAL_DEBUGGING > 1
     Serial.println("[Callbacks] No callback found for action = " + String(action));
 #endif
-    return false;
+    return "";
 }
 
 // **** ST ACTIONS **** //
@@ -532,12 +531,14 @@ void SmartThingsLib::subscribeSTWebCmd(WebServer &server, WebServer::ConnectionT
 void SmartThingsLib::failureWebCmd(WebServer &server, WebServer::ConnectionType type, char *url_tail, bool tail_complete)
 {
     if (strlen(url_tail) > 0) {
-        if (_stLib.dispatchCallback(url_tail)) {
-            server.httpSuccess();
+        String response = _stLib.dispatchCallback(url_tail);
+        if (!response.equals("")) {
+            server.httpSuccess("application/json");
+            server.printP(response.c_str());
         } else {
-            #if STLIB_SERIAL_DEBUGGING > 1
-                        Serial.println("[WebServer] Failure! url not mapped!, type = " + String(type) + ", url = " + String(url_tail) + ", tail_complete = " + String(tail_complete) );
-            #endif
+#if STLIB_SERIAL_DEBUGGING > 1
+            Serial.println("[WebServer] Failure! url not mapped!, type = " + String(type) + ", url = " + String(url_tail) + ", tail_complete = " + String(tail_complete) );
+#endif
         }
     }
 }

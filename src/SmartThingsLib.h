@@ -38,7 +38,7 @@
  {
  public:
 
-     typedef void Callback();
+     typedef String Callback();
      typedef void CallbackVarSet(String param);
 
      struct CallbacksMap {
@@ -94,7 +94,7 @@
      void checkUDPMsg();
      void respondToSearchUdp();
 
-     bool dispatchCallback(char *action);
+     String dispatchCallback(char *action);
      void checkVariable(const char *name);
 
      static void indexWebCmd(WebServer &server, WebServer::ConnectionType type, char *, bool);
