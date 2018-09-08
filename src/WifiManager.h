@@ -22,4 +22,5 @@ private:
 
     void checkWifi();
     void stopTimer();
+    static void log(String msg);
 };

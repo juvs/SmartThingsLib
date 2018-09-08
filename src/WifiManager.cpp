@@ -21,28 +21,32 @@ WifiManager::WifiManager()
     _timerCheckWifi = new Timer(1000, &WifiManager::checkWifi, *this);
 }
 
+void WifiManager::log(String msg) {
+    Serial.println(String("[WifiManager] " + msg));
+}
+
 void WifiManager::begin() {
-    Serial.println("Connecting wifi...");
+    log("Connecting wifi...");
     WiFi.connect();
 }
 
 void WifiManager::manageWifi() {
     if (WiFi.ready()) {
         if (_connected == 0) {
-            Serial.printf("WiFi is ready!, connected to : ");
+            log("WiFi is ready!, connected to : ");
             Serial.printf(WiFi.SSID());
-            Serial.println(", localIP : " + String(WiFi.localIP()));
+            log(", localIP : " + String(WiFi.localIP()));
             _connected = 1;
             //Connecting to particle
             if (!Particle.connected()) {
-                Serial.println("Connecting to Particle...");
+                log("Connecting to Particle...");
                 Particle.connect();
             }
         }
     } else {
         if (!WiFi.connecting() && _connected == 1) {
             _connected = 0;
-            Serial.println("Reconnecting WiFi...");
+            log("Reconnecting WiFi...");
             WiFi.connect();
         }
         if (!_timerCheckWifi->isActive()) {
@@ -58,6 +62,6 @@ void WifiManager::checkWifi() {
     if (WiFi.ready()) {
         _timerCheckWifi->stop();
     } else {
-        Serial.println("Trying connect to WiFi...");
+        log("Trying connect to WiFi...");
     }
 }

@@ -94,7 +94,7 @@ void SmartThingsLib::tryConnect() {
         }
     } else {
         if (_connected == 1) { //Me desconecto
-            log("Lost wifi connection!");
+            log("Lost WiFi connection!");
             log("Shutting down udp and webserver...");
             _uptime = 0;
             _udp.leaveMulticast(_udpMulticastAddress);
