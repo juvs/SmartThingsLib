@@ -89,13 +89,13 @@ void SmartThingsLib::tryConnect() {
             _webserver.begin();
             _connected = 1;
 
-            log("SmartthingsLib connected!");
+            log("Connected!");
             showInfo();
         }
     } else {
         if (_connected == 1) { //Me desconecto
-            log("SmartthingsLib lost wifi connection!");
-            log("SmartthingsLib shutting down udp and webserver...");
+            log("Lost wifi connection!");
+            log("Shutting down udp and webserver...");
             _uptime = 0;
             _udp.leaveMulticast(_udpMulticastAddress);
             _udp.stop();
@@ -121,7 +121,7 @@ void SmartThingsLib::process() {
 }
 
 void SmartThingsLib::showInfo() {
-    log("SmartThingsLib INFO");
+    log("Device info");
     log("  - Device Id    = " + String(m_deviceId));
     log("  - Device Name  = " + String(m_deviceName));
     log("  - Device Class = " + String(m_deviceClass));
@@ -135,8 +135,8 @@ void SmartThingsLib::showInfo() {
 }
 
 bool SmartThingsLib::isConnected() {
-    if (_connected == 1) {
-        log("[Wifi] ERROR - Device is not connected");
+    if (_connected == 0) {
+        log("Device is not connected to WiFi");
         return false;
     } else {
         return true;
@@ -145,7 +145,7 @@ bool SmartThingsLib::isConnected() {
 
 void SmartThingsLib::log(String msg) {
     #if STLIB_SERIAL_DEBUGGING > 1
-        Serial.println(msg);
+        Serial.println(String("[SmartThingsLib] " + msg));
     #endif
 }
 
@@ -154,7 +154,7 @@ void SmartThingsLib::monitorVariable(const char *name, int &var) {
         checkVariable(name);
         _paramsInt[_paramsIntCount].name = name;
         _paramsInt[_paramsIntCount++].value = &var;
-        log("[Variable] Added int variable with name = " + String(name) + ", value = " + String(var));
+        log("Added int variable with name = " + String(name) + ", value = " + String(var));
     }
 }
 
@@ -163,7 +163,7 @@ void SmartThingsLib::monitorVariable(const char *name, long &var) {
         checkVariable(name);
         _paramsLong[_paramsLongCount].name = name;
         _paramsLong[_paramsLongCount++].value = &var;
-        log("[Variable] Added long variable with name = " + String(name) + ", value = " + String(var));
+        log("Added long variable with name = " + String(name) + ", value = " + String(var));
     }
 }
 
@@ -172,7 +172,7 @@ void SmartThingsLib::monitorVariable(const char *name, String &var) {
         checkVariable(name);
         _paramsString[_paramsStringCount].name = name;
         _paramsString[_paramsStringCount++].value = &var;
-        log("[Variable] Added String variable with name = " + String(name) + ", value = " + String(var));
+        log("Added String variable with name = " + String(name) + ", value = " + String(var));
     }
 }
 
@@ -184,7 +184,7 @@ void SmartThingsLib::checkVariable(const char *name) {
     //Review int values
     for (i = 0; i < _paramsIntCount; ++i) {
         if ((name_len == strlen(_paramsInt[i].name)) && (strncmp(name, _paramsInt[i].name, name_len) == 0)) {
-            log("[Variable] " + String(name) + " removed from monitor int values array.");
+            log("Variable " + String(name) + " removed from monitor int values array.");
             _paramsInt[i].name = String("").c_str();
             found = 1;
             break;
@@ -193,7 +193,7 @@ void SmartThingsLib::checkVariable(const char *name) {
     if (found == 1) return;
     for (i = 0; i < _paramsLongCount; ++i) {
         if ((name_len == strlen(_paramsLong[i].name)) && (strncmp(name, _paramsLong[i].name, name_len) == 0)) {
-            log("[Variable] " + String(name) + " removed from monitor long values array.");
+            log("Variable " + String(name) + " removed from monitor long values array.");
             _paramsLong[i].name = String("").c_str();
             found = 1;
             break;
@@ -202,7 +202,7 @@ void SmartThingsLib::checkVariable(const char *name) {
     if (found == 1) return;
     for (i = 0; i < _paramsStringCount; ++i) {
         if ((name_len == strlen(_paramsString[i].name)) && (strncmp(name, _paramsString[i].name, name_len) == 0)) {
-            log("[Variable] " + String(name) + " removed from monitor String values array.");
+            log("Variable " + String(name) + " removed from monitor String values array.");
             _paramsString[i].name = String("").c_str();
             break;
         }
@@ -226,7 +226,7 @@ void SmartThingsLib::callbackForAction(const char *action, Callback *callback) {
     if (_callbacksCount < SIZE(_callbacks)){
         _callbacks[_callbacksCount].action = action;
         _callbacks[_callbacksCount++].callback = callback;
-        log("[Callbacks] Added action = " + String(action) + " to callbacks, records = " + String(_callbacksCount));
+        log("Added action = " + String(action) + " to callbacks, records = " + String(_callbacksCount));
     }
 }
 
@@ -235,14 +235,14 @@ void SmartThingsLib::callbackForVarSet(CallbackVarSet *callback) {
 }
 
 String SmartThingsLib::dispatchCallback(char *action) {
-    log("[Callbacks] Checking action = " + String(action) + " to dispatch possible callback in " + String(_callbacksCount) + " records...");
+    log("Checking action = " + String(action) + " to dispatch possible callback in " + String(_callbacksCount) + " records...");
     if (strlen(action) > 0) {
         // if there is no URL, i.e. we have a prefix and it's requested without a
         // trailing slash or if the URL is just the slash
         // if the URL is just a slash followed by a question mark
         // we're looking at the default command with GET parameters passed
         if ((action[0] == 0) || ((action[0] == '/') && (action[1] == 0)) || (action[0] == '/') && (action[1] == '?')) {
-            log("[Callbacks] Action = " + String(action) + " malformed.");
+            log("Action = " + String(action) + " malformed.");
             return "";
         }
 
@@ -263,14 +263,14 @@ String SmartThingsLib::dispatchCallback(char *action) {
             qm_offset = (qm_loc == NULL) ? 0 : 1;
             for (i = 0; i < _callbacksCount; ++i) {
                 if ((action_len == strlen(_callbacks[i].action)) && (strncmp(action, _callbacks[i].action, action_len) == 0)) {
-                    log("[Callbacks] Found callback for action = " + String(action) + " dispatching...");
+                    log("Found callback for action = " + String(action) + " dispatching...");
                     return _callbacks[i].callback();
                 }
 
             }
         }
     }
-    log("[Callbacks] No callback found for action = " + String(action));
+    log("No callback found for action = " + String(action));
     return "";
 }
 
@@ -302,7 +302,7 @@ bool SmartThingsLib::notifyHub(String body) {
             serverPath = serverIP.substring(serverIP.indexOf("/", indexColon + 1));
             serverIP = serverIP.substring(0, serverIP.indexOf(":"));
 
-            log("[NotifyHub] Notify to ST, body: " + body + ", server: " + serverIP + ", port: " + serverPort + ", path: " + serverPath);
+            log("Notify to ST HUB, body: " + body + ", server: " + serverIP + ", port: " + serverPort + ", path: " + serverPath);
 
             IPAddress server = WiFi.resolve(serverIP);
             request.ip = server;
@@ -315,14 +315,14 @@ bool SmartThingsLib::notifyHub(String body) {
             http.post(request, response, headersST);
 
             if (response.status == 200 || response.status == 202) {
-                log("[NotifyHub] Notify to HUB with response OK!");
+                log("Notify to HUB with response OK!");
                 return true;
             } else {
-                log("[NotifyHub] Notify ST ERROR! " + String(response.status) + " " + String(response.body));
+                log("Notify ST ERROR! " + String(response.status) + " " + String(response.body));
                 return false;
             }
         } else {
-            log("[NotifyHub] No callbackurl for notify to the HUB!");
+            log("No callbackurl for notify to the HUB!");
         }
     }
 }
@@ -347,7 +347,7 @@ void SmartThingsLib::checkUDPMsg() {
     if (request.indexOf('M-SEARCH * HTTP/1.1') > 0 && request.indexOf('ST: urn:schemas-upnp-org:device:') > 0) {
         if(request.indexOf("urn:schemas-upnp-org:device:" + _deviceClass + ":1") > 0) {
 #if STLIB_SERIAL_DEBUGGING > 1
-            Serial.print("[UPNP] Received UDP packet from = ");
+            log("Received UDP packet from : ");
             IPAddress remote = _udp.remoteIP();
             for (int i =0; i < 4; i++) {
                 Serial.print(remote[i], DEC);
@@ -356,8 +356,8 @@ void SmartThingsLib::checkUDPMsg() {
                 }
             }
             Serial.print(", port = ");
-            log(String(_udp.remotePort()));
-            log("[UPNP] Responding to M-SEARCH request ...");
+            Serial.println(String(_udp.remotePort()));
+            log("Responding to M-SEARCH request...");
 #endif
             int r = random(4);
             delay(r);
@@ -365,8 +365,8 @@ void SmartThingsLib::checkUDPMsg() {
         }
     } else if (request.indexOf("upnp:event") > 0) {
 #if STLIB_SERIAL_DEBUGGING > 1
-        Serial.print("[UPNP] Received packet of size ");
-        log(String(packetSize));
+        log("Received UDP packet of size ");
+        Serial.println(String(packetSize));
         Serial.print("From ");
         IPAddress remote = _udp.remoteIP();
         for (int i =0; i < 4; i++) {
@@ -376,9 +376,9 @@ void SmartThingsLib::checkUDPMsg() {
             }
         }
         Serial.print(", port ");
-        log(String(_udp.remotePort()));
-        log("Request:");
-        log(request);
+        Serial.println(String(_udp.remotePort()));
+        Serial.println("Request:");
+        Serial.println(request);
 #endif
     }
   }
@@ -406,7 +406,7 @@ void SmartThingsLib::respondToSearchUdp() {
     _udp.write(response.c_str());
     _udp.endPacket();
 
-    log("[UPNP] Response to M-SEARCH sent!");
+    log("UPNP Response to M-SEARCH sent!");
 }
 
 // **** WEBSERVER COMMANDS **** //
@@ -429,7 +429,7 @@ void SmartThingsLib::indexWebCmd(WebServer &server, WebServer::ConnectionType ty
 
 void SmartThingsLib::descriptionWebCmd(WebServer &server, WebServer::ConnectionType type, char *, bool)
 {
-    log("[WebServer] Call from description.xml...");
+    log("Webserver call for description.xml...");
     /* this line sends the standard "we're all OK" headers back to the
         browser */
     server.httpSuccess("text/xml");
@@ -469,13 +469,13 @@ void SmartThingsLib::descriptionWebCmd(WebServer &server, WebServer::ConnectionT
 
     /* this is a special form of print that outputs from PROGMEM */
     server.printP(description_xml.c_str());
-    log("[WebServer] Sending response from description.xml call...");
+    log("Webserver sending response from description.xml call...");
   }
 }
 
 void SmartThingsLib::subscribeSTWebCmd(WebServer &server, WebServer::ConnectionType type, char *, bool)
 {
-    log("[WebServer] Call from subscribe...");
+    log("Webserver call for subscribe...");
     /* this line sends the standard "we're all OK" headers back to the
      browser */
     server.httpSuccess();
@@ -491,7 +491,7 @@ void SmartThingsLib::subscribeSTWebCmd(WebServer &server, WebServer::ConnectionT
         _callbackURLST = _callbackURLST.substring(1); //Removemos el <
         _callbackURLST.remove(_callbackURLST.length() - 1); //Removemos el >
 
-        log("[WebServer] Callback : " + _callbackURLST);
+        log("Webserver Callback : " + _callbackURLST);
         /* this defines some HTML text in read-only memory aka PROGMEM.
          * This is needed to avoid having the string copied to our limited
          * amount of RAM. */
@@ -499,7 +499,7 @@ void SmartThingsLib::subscribeSTWebCmd(WebServer &server, WebServer::ConnectionT
         /* this is a special form of print that outputs from PROGMEM */
         server.printP(eventservice_xml.c_str());
     }
-    log("[WebServer] Sending response from subscribe call...");
+    log("Webserver sending response from subscribe call...");
 }
 
 void SmartThingsLib::failureWebCmd(WebServer &server, WebServer::ConnectionType type, char *url_tail, bool tail_complete)
@@ -510,7 +510,7 @@ void SmartThingsLib::failureWebCmd(WebServer &server, WebServer::ConnectionType 
             server.httpSuccess("application/json");
             server.printP(response.c_str());
         } else {
-            log("[WebServer] Failure! url not mapped!, type = " + String(type) + ", url = " + String(url_tail) + ", tail_complete = " + String(tail_complete) );
+            log("Webserver failure! url not mapped!, type = " + String(type) + ", url = " + String(url_tail) + ", tail_complete = " + String(tail_complete) );
         }
     }
 }
@@ -539,12 +539,12 @@ void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionTyp
             if (rc != URLPARAM_EOS) {
                 uint8_t i;
                 size_t param_len;
-                log("[Variable] Config set for param = " + String(name) + ", with value = " + String(value));
+                log("Config set for param = " + String(name) + ", with value = " + String(value));
                 param_len = strlen(name);
                 //Review on int values
                 for (i = 0; i < _paramsIntCount; ++i) {
                     if ((param_len == strlen(_paramsInt[i].name)) && (strncmp(name, _paramsInt[i].name, param_len) == 0)) {
-                        log("[Variable] Setting value for int variable = " + String(name) + ", current value " + String(*_paramsInt[i].value) + ", new value = " + String(value));
+                        log("Setting value for int variable = " + String(name) + ", current value " + String(*_paramsInt[i].value) + ", new value = " + String(value));
                         *_paramsInt[i].value = (int)String(value).toInt();
                         if (_callbackVarSet != nullptr) {
                             _callbackVarSet(String(name));
@@ -555,7 +555,7 @@ void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionTyp
                 //Review on long values
                 for (i = 0; i < _paramsLongCount; ++i) {
                     if ((param_len == strlen(_paramsLong[i].name)) && (strncmp(name, _paramsLong[i].name, param_len) == 0)) {
-                        log("[Variable] Setting value for long variable = " + String(name) + ", current value " + String(*_paramsLong[i].value) + ", new value = " + String(value));
+                        log("Setting value for long variable = " + String(name) + ", current value " + String(*_paramsLong[i].value) + ", new value = " + String(value));
                         *_paramsLong[i].value = String(value).toInt();
                         if (_callbackVarSet != nullptr) {
                             _callbackVarSet(String(name));
@@ -566,7 +566,7 @@ void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionTyp
                 //Review on String values
                 for (i = 0; i < _paramsStringCount; ++i) {
                     if ((param_len == strlen(_paramsString[i].name)) && (strncmp(name, _paramsString[i].name, param_len) == 0)) {
-                        log("[Variable] Setting value for String variable = " + String(name) + ", current value " + String(*_paramsString[i].value) + ", new value = " + String(value));
+                        log("Setting value for String variable = " + String(name) + ", current value " + String(*_paramsString[i].value) + ", new value = " + String(value));
                         *_paramsString[i].value = String(value);
                         if (_callbackVarSet != nullptr) {
                             _callbackVarSet(String(name));
@@ -601,14 +601,14 @@ void SmartThingsLib::configGetWebCmd(WebServer &server, WebServer::ConnectionTyp
                 uint8_t i;
                 size_t param_len;
                 size_t value_len;
-                log("[Variable] Config get for param = " + String(name) + ", with value = " + String(value));
+                log("Config get for param = " + String(name) + ", with value = " + String(value));
                 param_len = strlen(name);
                 if (strncmp(name, "name", param_len) == 0) {
                     value_len = strlen(value);
                     //Review on int values
                     for (i = 0; i < _paramsIntCount; ++i) {
                         if ((value_len == strlen(_paramsInt[i].name)) && (strncmp(value, _paramsInt[i].name, value_len) == 0)) {
-                            log("[Variable] Return value for variable = " + String(value) + ", current int value " + String(*_paramsInt[i].value));
+                            log("Return value for variable = " + String(value) + ", current int value " + String(*_paramsInt[i].value));
                             server.printP(buildResponseVariable(name, *_paramsInt[i].value));
                             return;
                         }
@@ -616,7 +616,7 @@ void SmartThingsLib::configGetWebCmd(WebServer &server, WebServer::ConnectionTyp
                     //Review on long values
                     for (i = 0; i < _paramsLongCount; ++i) {
                         if ((value_len == strlen(_paramsLong[i].name)) && (strncmp(value, _paramsLong[i].name, value_len) == 0)) {
-                            log("[Variable] Return value for variable = " + String(value) + ", current long value " + String(*_paramsLong[i].value));
+                            log("Return value for variable = " + String(value) + ", current long value " + String(*_paramsLong[i].value));
                             server.printP(buildResponseVariable(name, *_paramsLong[i].value));
                             return;
                         }
@@ -624,12 +624,12 @@ void SmartThingsLib::configGetWebCmd(WebServer &server, WebServer::ConnectionTyp
                     //Review on long values
                     for (i = 0; i < _paramsStringCount; ++i) {
                         if ((value_len == strlen(_paramsString[i].name)) && (strncmp(value, _paramsString[i].name, value_len) == 0)) {
-                            log("[Variable] Return value for variable = " + String(value) + ", current String value " + String(*_paramsString[i].value));
+                            log("Return value for variable = " + String(value) + ", current String value " + String(*_paramsString[i].value));
                             server.printP(buildResponseVariable(name, *_paramsString[i].value));
                             return;
                         }
                     }
-                    log("[Variable] variable = " + String(value) + " not found!");
+                    log("variable = " + String(value) + " not found!");
                     server.printP(buildJsonResponseVariable(name, "", false));
                 }
             }
