@@ -235,7 +235,6 @@ void SmartThingsLib::callbackForVarSet(CallbackVarSet *callback) {
 }
 
 String SmartThingsLib::dispatchCallback(char *action) {
-
     log("[Callbacks] Checking action = " + String(action) + " to dispatch possible callback in " + String(_callbacksCount) + " records...");
     if (strlen(action) > 0) {
         // if there is no URL, i.e. we have a prefix and it's requested without a
@@ -278,51 +277,53 @@ String SmartThingsLib::dispatchCallback(char *action) {
 // **** ST ACTIONS **** //
 
 bool SmartThingsLib::notifyHub(String body) {
-    if (_callbackURLST.trim().length() > 0) {
-        HttpClient http;
-        http_request_t request;
-        http_response_t response;
-        http_header_t headersST[] = {
-            { "content-type" , "application/json"},
-            { "Accept" , "*/*"},
-            { "access-control-allow-origin" , "*"},
-            { "server" , "Webduino/1.9.1"},
-            { NULL, NULL } // NOTE: Always terminate headers will NULL
-        };
+    if (isConnected()) {
+        if (_callbackURLST.trim().length() > 0) {
+            HttpClient http;
+            http_request_t request;
+            http_response_t response;
+            http_header_t headersST[] = {
+                { "content-type" , "application/json"},
+                { "Accept" , "*/*"},
+                { "access-control-allow-origin" , "*"},
+                { "server" , "Webduino/1.9.1"},
+                { NULL, NULL } // NOTE: Always terminate headers will NULL
+            };
 
-        String serverIP = _callbackURLST;
-        String serverPort;
-        String serverPath;
+            String serverIP = _callbackURLST;
+            String serverPort;
+            String serverPath;
 
-        serverIP = serverIP.substring(7); //remove http://
+            serverIP = serverIP.substring(7); //remove http://
 
-        int indexColon = serverIP.indexOf(":");
+            int indexColon = serverIP.indexOf(":");
 
-        serverPort = serverIP.substring(indexColon + 1, serverIP.indexOf("/", indexColon + 1));
-        serverPath = serverIP.substring(serverIP.indexOf("/", indexColon + 1));
-        serverIP = serverIP.substring(0, serverIP.indexOf(":"));
+            serverPort = serverIP.substring(indexColon + 1, serverIP.indexOf("/", indexColon + 1));
+            serverPath = serverIP.substring(serverIP.indexOf("/", indexColon + 1));
+            serverIP = serverIP.substring(0, serverIP.indexOf(":"));
 
-        log("[NotifyHub] Notify to ST, body: " + body + ", server: " + serverIP + ", port: " + serverPort + ", path: " + serverPath);
+            log("[NotifyHub] Notify to ST, body: " + body + ", server: " + serverIP + ", port: " + serverPort + ", path: " + serverPath);
 
-        IPAddress server = WiFi.resolve(serverIP);
-        request.ip = server;
-        request.port = serverPort.toInt();
-        request.path = serverPath;
+            IPAddress server = WiFi.resolve(serverIP);
+            request.ip = server;
+            request.port = serverPort.toInt();
+            request.path = serverPath;
 
-        request.body = body;
+            request.body = body;
 
-        // Get request
-        http.post(request, response, headersST);
+            // Get request
+            http.post(request, response, headersST);
 
-        if (response.status == 200 || response.status == 202) {
-            log("[NotifyHub] Notify to HUB with response OK!");
-            return true;
+            if (response.status == 200 || response.status == 202) {
+                log("[NotifyHub] Notify to HUB with response OK!");
+                return true;
+            } else {
+                log("[NotifyHub] Notify ST ERROR! " + String(response.status) + " " + String(response.body));
+                return false;
+            }
         } else {
-            log("[NotifyHub] Notify ST ERROR! " + String(response.status) + " " + String(response.body));
-            return false;
+            log("[NotifyHub] No callbackurl for notify to the HUB!");
         }
-    } else {
-        log("[NotifyHub] No callbackurl for notify to the HUB!");
     }
 }
 

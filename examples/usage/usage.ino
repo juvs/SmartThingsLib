@@ -40,7 +40,7 @@ void loop() {
         String json = "{\"event\":\"monitor_start\"}";
         smartThingsLib.notifyHub(json);
     }
-    delay(500);
+    delay(5);
 }
 
 String callbackAction() {
