@@ -1,6 +1,9 @@
 // Example usage for SmartThingsLib library by Juvenal Guzman.
 
-#include "SmartThingsLib.h"
+#include <SmartThingsLib.h>
+
+SYSTEM_THREAD(ENABLED);
+SYSTEM_MODE(MANUAL);
 
 // Initialize objects from the lib device id prefix, device name, device class, version
 SmartThingsLib smartThingsLib("mydevice", "My Device", "MyDevice", "0.0.1");
@@ -14,7 +17,7 @@ void setup() {
     // Call functions on initialized library objects that require hardware
     smartThingsLib.begin();
 
-    //A GET call from ST to this device, normally don't pass parameters
+    //A GET call from ST to this device, normally don't pass parameters like REST request
     smartThingsLib.callbackForAction("action", &callbackAction);
 
     //To change this value from ST call a GET using this url http://{your_ip}/configSet?myVar=1, the value will change to 1
@@ -24,9 +27,6 @@ void setup() {
 
     //A callback that notifies when a variable change using configSet call, applies to all variables register using monitorVariable
     smartThingsLib.callbackForVarSet(&callbackVariableSet);
-
-    //Shows usefull info
-    smartThingsLib.showInfo();
 
     pinMode(D7, OUTPUT);
 }
@@ -43,7 +43,7 @@ void loop() {
     delay(500);
 }
 
-void callbackAction() {
+String callbackAction() {
     //Do your stuff...
     Serial.println("Call from /action url, do some!");
     if (turnOn == 0) {

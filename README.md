@@ -20,7 +20,11 @@ Connect XYZ hardware, add the SmartThingsLib library to your project and follow 
 
 ```
 #include "SmartThingsLib.h"
-SmartThingsLib smartThingsLib;
+
+SYSTEM_THREAD(ENABLED); //Super import!
+SYSTEM_MODE(MANUAL); //Super import!
+
+SmartThingsLib smartThingsLib("mydevice", "My Device", "MyDevice", "0.0.1");
 
 void setup() {
   smartThingsLib.begin();
@@ -51,7 +55,7 @@ To compile an example, use `particle compile examples/usage` command in [Particl
 
 After your changes are done you can upload them with `particle library upload` or `Upload` command in the IDE. This will create a private (only visible by you) library that you can use in other projects. Do `particle library add SmartThingsLib_myname` to add the library to a project on your machine or add the SmartThingsLib_myname library to a project on the Web IDE or Desktop IDE.
 
-At this point, you can create a [GitHub pull request](https://help.github.com/articles/about-pull-requests/) with your changes to the original library. 
+At this point, you can create a [GitHub pull request](https://help.github.com/articles/about-pull-requests/) with your changes to the original library.
 
 If you wish to make your library public, use `particle library publish` or `Publish` command.
 
