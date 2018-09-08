@@ -33,9 +33,7 @@ void WifiManager::begin() {
 void WifiManager::manageWifi() {
     if (WiFi.ready()) {
         if (_connected == 0) {
-            log("WiFi is ready!, connected to : ");
-            Serial.printf(WiFi.SSID());
-            log(", localIP : " + String(WiFi.localIP()));
+            log("WiFi is ready!, connected to : " + String(WiFi.SSID()) + ", localIP : " + String(WiFi.localIP()));
             _connected = 1;
             //Connecting to particle
             if (!Particle.connected()) {
