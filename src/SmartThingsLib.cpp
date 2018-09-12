@@ -566,7 +566,10 @@ void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionTyp
                 for (i = 0; i < _paramsStringCount; ++i) {
                     if ((param_len == strlen(_paramsString[i].name)) && (strncmp(name, _paramsString[i].name, param_len) == 0)) {
                         log("Setting value for String variable = " + String(name) + ", current value " + String(*_paramsString[i].value) + ", new value = " + String(value));
-                        *_paramsString[i].value = String(value);
+                        // int inputLen = sizeof(value);
+                        // char cValue[inputLen];
+                        // strcpy(cValue, value.c_str());
+                        *_paramsString[i].value = value;
                         if (_callbackVarSet != nullptr) {
                             _callbackVarSet(String(name));
                         }

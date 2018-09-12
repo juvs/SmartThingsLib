@@ -9,7 +9,9 @@ SYSTEM_MODE(MANUAL);
 SmartThingsLib smartThingsLib("mydevice", "My Device", "MyDevice", "0.0.1");
 
 int turnOn = 0;
-int myVar = 0;
+int myVarInt = 0;
+long myVarLong = 0;
+String myVarStr = "empty";
 
 void setup() {
     Serial.begin(9600);
@@ -23,10 +25,14 @@ void setup() {
     //If you wanna response something, do it on the callback funcion.
     smartThingsLib.callbackForAction("status", &callbackStatus);
 
-    //To change this value from ST call a GET using this url http://{your_ip}/configSet?myVar=1, the value will change to 1
+    //To change this value from ST call a GET using this url http://{your_ip}/configSet?myVarInt=1, the value will change to 1
     //can register int, long and String type var
-    //you can also retrive the value of this variable on ST using this url http://{your_ip}/configGet?name=myVar
-    smartThingsLib.monitorVariable("myVar", myVar);
+    //you can also retrive the value of this variable on ST using this url http://{your_ip}/configGet?name=myVarInt
+    smartThingsLib.monitorVariable("myVarInt", myVarInt);
+
+    smartThingsLib.monitorVariable("myVarStr", myVarStr);
+
+    smartThingsLib.monitorVariable("myVarLong", myVarLong);
 
     //A callback that notifies when a variable change using configSet call, applies to all variables register using monitorVariable
     smartThingsLib.callbackForVarSet(&callbackVariableSet);
@@ -69,9 +75,18 @@ String callbackStatus() {
 void callbackVariableSet(String param) {
     //When the variable change, do some usefull thing on this device...
     Serial.println("Variable " + param + " changed!");
-    if (myVar > 0) {
+    if (myVarInt > 0) {
         digitalWrite(D7, HIGH);
     } else {
         digitalWrite(D7, LOW);
+    }
+    if (myVarLong > 100) {
+        digitalWrite(D7, HIGH);
+    } else {
+        digitalWrite(D7, LOW);
+    }
+
+    if (param == "myVarStr") {
+        Serial.println("Variable myVarStr new value is " + myVarStr);
     }
 }
