@@ -20,6 +20,9 @@ void setup() {
     //A GET call from ST to this device, normally don't pass parameters like REST request
     smartThingsLib.callbackForAction("action", &callbackAction);
 
+    //If you wanna response something, do it on the callback funcion.
+    smartThingsLib.callbackForAction("status", &callbackStatus);
+
     //To change this value from ST call a GET using this url http://{your_ip}/configSet?myVar=1, the value will change to 1
     //can register int, long and String type var
     //you can also retrive the value of this variable on ST using this url http://{your_ip}/configGet?name=myVar
@@ -53,6 +56,14 @@ String callbackAction() {
         turnOn = 0;
         digitalWrite(D7, LOW);
     }
+    return "ok";
+}
+
+String callbackStatus() {
+    String uptime;
+    smartThingsLib.getUpTime(uptime);
+    String led = turnOn == 0 ? "off" : "on";
+    return String("{\"uptime\":\"" + uptime + "\", \"led\":\"" + led + "\" }");
 }
 
 void callbackVariableSet(String param) {

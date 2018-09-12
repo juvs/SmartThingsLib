@@ -52,8 +52,6 @@ SmartThingsLib::SmartThingsLib(const char *deviceId, const char *deviceName, con
     _stLib = *this;
     _callbacksCount = 0;
     _paramsIntCount = 0;
-
-    prepareIds();
 }
 
 void SmartThingsLib::prepareIds() {
@@ -65,6 +63,7 @@ void SmartThingsLib::prepareIds() {
 }
 
 void SmartThingsLib::begin() {
+    prepareIds();
     _wfm = WifiManager::getInstance();
     _wfm->begin();
 
@@ -601,7 +600,7 @@ void SmartThingsLib::configGetWebCmd(WebServer &server, WebServer::ConnectionTyp
                 uint8_t i;
                 size_t param_len;
                 size_t value_len;
-                log("Config get for param = " + String(name) + ", with value = " + String(value));
+                log("Config get for param = " + String(name));
                 param_len = strlen(name);
                 if (strncmp(name, "name", param_len) == 0) {
                     value_len = strlen(value);
@@ -621,7 +620,7 @@ void SmartThingsLib::configGetWebCmd(WebServer &server, WebServer::ConnectionTyp
                             return;
                         }
                     }
-                    //Review on long values
+                    //Review on String values
                     for (i = 0; i < _paramsStringCount; ++i) {
                         if ((value_len == strlen(_paramsString[i].name)) && (strncmp(value, _paramsString[i].name, value_len) == 0)) {
                             log("Return value for variable = " + String(value) + ", current String value " + String(*_paramsString[i].value));
@@ -646,7 +645,7 @@ const char* SmartThingsLib::buildResponseVariable(char *name, long value) {
 }
 
 const char* SmartThingsLib::buildResponseVariable(char *name, String value) {
-    return buildJsonResponseVariable(name, value, true);
+    return buildJsonResponseVariable(name, String(value), true);
 }
 
 const char* SmartThingsLib::buildJsonResponseVariable(char *name, String value, bool success) {
