@@ -18,7 +18,7 @@ WifiManager* WifiManager::_instance = NULL;
 
 WifiManager::WifiManager()
 {
-    _timerCheckWifi = new Timer(1000, &WifiManager::checkWifi, *this);
+    _timerCheckWifi = new Timer(5000, &WifiManager::checkWifi, *this);
 }
 
 void WifiManager::log(String msg) {

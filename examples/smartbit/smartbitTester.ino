@@ -43,7 +43,7 @@ void loop() {
 
     if (System.buttonPushed() > 100) { // just press once SETUP button
         Serial.println("Sending event to ST hub!");
-        String json = "{\"event\":\"monitor_start\"}";
+        String json = "{\"action\":\"do\"}";
         smartThingsLib.notifyHub(json);
     }
     delay(5);

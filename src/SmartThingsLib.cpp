@@ -519,9 +519,10 @@ void SmartThingsLib::failureWebCmd(WebServer &server, WebServer::ConnectionType 
 
 void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionType type, char *url_tail, bool tail_complete)
 {
+    //Sample configSet?[name]=[value]
     URLPARAM_RESULT rc;
     char name[PARAM_NAMELEN];
-    char value[PARAM_NAMELEN];
+    char value[PARAM_VALUELEN];
 
     /* this line sends the standard "we're all OK" headers back to the
        browser */
@@ -534,6 +535,7 @@ void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionTyp
 
     if (strlen(url_tail)) {
         while (strlen(url_tail)) {
+            String response = "error";
             rc = server.nextURLparam(&url_tail, name, PARAM_NAMELEN, value, PARAM_VALUELEN);
             if (rc != URLPARAM_EOS) {
                 uint8_t i;
@@ -548,6 +550,7 @@ void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionTyp
                         if (_callbackVarSet != nullptr) {
                             _callbackVarSet(String(name));
                         }
+                        response = "ok";
                         return;
                     }
                 }
@@ -559,6 +562,7 @@ void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionTyp
                         if (_callbackVarSet != nullptr) {
                             _callbackVarSet(String(name));
                         }
+                        response = "ok";
                         return;
                     }
                 }
@@ -573,9 +577,11 @@ void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionTyp
                         if (_callbackVarSet != nullptr) {
                             _callbackVarSet(String(name));
                         }
+                        response = "ok";
                         return;
                     }
                 }
+                server.printP(response.c_str());
             }
         }
     }
@@ -583,9 +589,10 @@ void SmartThingsLib::configSetWebCmd(WebServer &server, WebServer::ConnectionTyp
 
 void SmartThingsLib::configGetWebCmd(WebServer &server, WebServer::ConnectionType type, char *url_tail, bool tail_complete)
 {
+    //Sample configGet?name=[name]
     URLPARAM_RESULT rc;
     char name[PARAM_NAMELEN];
-    char value[PARAM_NAMELEN];
+    char value[PARAM_VALUELEN];
 
     /* this line sends the standard "we're all OK" headers back to the
        browser */
